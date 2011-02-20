@@ -33,14 +33,14 @@ breed <- function(pairs, t, last.id) {
 
 # Generate a random pedigree of given depth and population size
 genped <- function(founders=c(20, 20),
-				   pop_size=30,
+				   capacity=70,
 				   im_rate=c(0, 0.05),
 				   em_rate=c(0, 0.1),
 				   im_age=c(7, 7),
 				   em_age=c(7, 7),
 				   primiparity=c(5,5),
 				   birth_rate = .3,
-				   seasons=10,
+				   seasons=100,
 				   inbreeding_tol=0.1,
 				   survival_fun) {
 					
@@ -70,6 +70,18 @@ genped <- function(founders=c(20, 20),
 			ped <- rbind(ped, new.generation)
 			
 		}
+		
+		#############
+		# migration #
+		#############
+		
+		
+		
+		#############
+		# mortality #
+		#############
+		
+		
 		
 	}	
 	
