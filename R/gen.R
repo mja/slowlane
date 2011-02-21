@@ -75,7 +75,21 @@ genped <- function(founders=c(20, 20),
 		# migration #
 		#############
 		
+		# number of new migrants
+		immigrant.f <- rbinom(1, capacity, im_rate[1])
+		immigrant.m <- rbinom(1, capacity, im_rate[2])
 		
+		last_id = max(ped$id)
+		no_immigrants = c(immigrant.f, immigrant.m)
+		if(sum(no_immigrants) >= 1) {
+			immigrants <- data.frame(id=(last_id + 1):(last_id + sum(no_immigrants)),
+									 dam_id=NA, sire_id=NA,
+									 sex=rep(c(0, 1), times=no_immigrants),
+									 birth=rep(t - primiparity, times=no_immigrants), # for now assume new migrants
+									 death=NA)				# are exactly at breeding age
+								
+			ped <- rbind(ped, immigrants)
+		}
 		
 		#############
 		# mortality #
