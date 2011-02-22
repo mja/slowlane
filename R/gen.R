@@ -1,4 +1,5 @@
 library(plyr)
+library(MCMCglmm)
 
 # get the resident members from the pedigree
 resident <- function(ped) {
@@ -65,8 +66,12 @@ pedgen <- function(founders=c(20, 20),
 	# simulate for n seasons
 	for(t in 1:seasons) {
 		
-    current <- resident(ped)
-
+   	 	current <- resident(ped)
+		n <- dim(current)[1]
+		A <- diag(1, nrow=n, ncol=n)
+		try(A <- solve(inverseA(current[,1:3])$Ainv), silent=TRUE) # fails if parents are all NA
+		rownames(A) <- colnames(A) <- current$id
+		
 		############
 		# breeding #
 		############

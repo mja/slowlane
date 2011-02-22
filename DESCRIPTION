@@ -8,6 +8,6 @@ Description: slowlane is a set of methods for generating and simulating
 Version: 0.1
 Author: Mark James Adams <mark@raysend.com>
 Maintainer: Mark James Adams <mark@raysend.com>
-Depends: plyr
+Depends: plyr, MCMCglmm
 Suggests: pedantics 
 License: MIT
