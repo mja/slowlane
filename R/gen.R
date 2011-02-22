@@ -57,8 +57,8 @@ survival.fun <- function(ages, P) {
 # Generate a random pedigree of given depth and population size
 pedgen <- function(founders=c(20, 20),
 				   capacity=70,
-				   im_rate=c(0, 0.05),
-				   em_rate=c(0, 0.1),
+				   im_rate=c(0, 0.3),
+				   em_rate=c(0, 0.3),
            primiparity=c(5,5),
 				   birth_rate = .3,
 				   seasons=100,
