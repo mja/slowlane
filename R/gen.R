@@ -25,8 +25,14 @@ will.breed <- function(breeding.f, birth_rate) {
 }
 
 # pick a mate for a give female
-pick.suitor <- function(female, males, A=NULL) { # possible future argument: A matrix
-	return(data.frame(female, male=sample(males, 1)))
+pick.suitor <- function(female, males, A, inbreeding_tol) { # A is the relationship matrix
+	pair <- NULL
+	relatedness <- A[as.character(female),as.character(males)]
+	relatedness[relatedness > inbreeding_tol] <- 1 # if relatedness is greater than inbreeding tolerance
+	try(pair <- data.frame(female, male=sample(males, 1, p=1 - relatedness)), silent=TRUE)
+									   # sample 1 male      exclude related males
+	
+	return(pair)
 }
 
 breed <- function(pairs, t, last.id) {
@@ -82,7 +88,7 @@ pedgen <- function(founders=c(20, 20),
 		breeding.f <- will.breed(breeding$f, birth_rate)
 		
 		# pick a male for each female
-		pairs <- adply(breeding.f, .margins=1, .fun=pick.suitor, males=breeding$m)
+		pairs <- adply(breeding.f, .margins=1, .fun=pick.suitor, males=breeding$m, A=A, inbreeding_tol=inbreeding_tol)
 		
 		if(dim(pairs)[1] != 0) { # there are some breeding pairs.
 			
