@@ -33,7 +33,7 @@ breed <- function(pairs, t, last.id) {
 	
 	n <- dim(pairs)[1]
 	return(data.frame(id=(last.id+1):(last.id+n),
-			   dam_id=pairs$female, sire_id=pairs$male,
+			   dam=pairs$female, sire=pairs$male,
 			   birth=t, death=NA, emigrated=NA,
 			   sex=rbinom(n, 1, 0.5)))
 }
@@ -61,7 +61,7 @@ genped <- function(founders=c(20, 20),
 					
 
 	# create the initial population
-	ped <- data.frame(id=1:sum(founders), dam_id=NA, sire_id=NA, sex=rep(c(0, 1), times=founders), birth=rep(-primiparity, times=founders), death=NA, emigrated=NA)
+	ped <- data.frame(id=1:sum(founders), dam=NA, sire=NA, sex=rep(c(0, 1), times=founders), birth=rep(-primiparity, times=founders), death=NA, emigrated=NA)
 
 	# simulate for n seasons
 	for(t in 1:seasons) {
@@ -100,7 +100,7 @@ genped <- function(founders=c(20, 20),
 		no_immigrants = c(immigrant.f, immigrant.m)
 		if(sum(no_immigrants) >= 1) {
 			immigrants <- data.frame(id=(last_id + 1):(last_id + sum(no_immigrants)),
-									 dam_id=NA, sire_id=NA,
+									 dam=NA, sire=NA,
 									 sex=rep(c(0, 1), times=no_immigrants),
 									 birth=rep(t - primiparity, times=no_immigrants), # for now assume new migrants
 									 death=NA,				# are exactly at breeding age
