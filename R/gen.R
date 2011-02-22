@@ -125,8 +125,21 @@ genped <- function(founders=c(20, 20),
 		
 		survives <- survival.fun(t - current$birth, mortality)
     
-    	ped[ped$id %in% current$id[!survives],]$death <- t
+		try(ped[ped$id %in% current$id[!survives],]$death <- t, silent=TRUE)
+		# because the expression fails if !survives are all FALSE
 		
+		##########
+		# fusion #
+		##########
+		
+		# if the population is 50% over carrying capacity
+		pop.size <- dim(current)[1]
+		
+		if(pop.size > 1.5 * capacity) {
+			emigrants <- sample(current$id, pop.size/2, replace=FALSE)
+			
+			ped[ped$id %in% emigrants,]$emigrated <- t
+		}
 	}	
 	
 	return(ped)
