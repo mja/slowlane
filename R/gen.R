@@ -1,5 +1,5 @@
-require(pedantics)
-require(plyr)
+library(pedantics)
+library(plyr)
 
 # get the resident members from the pedigree
 resident <- function(ped) {
