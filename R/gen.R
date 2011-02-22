@@ -38,9 +38,14 @@ breed <- function(pairs, t, last.id) {
 			   sex=rbinom(n, 1, 0.5)))
 }
 
+# P[age+1] gives survival
 survival.fun <- function(ages, P) {
 
-  
+	i <- ages + 1
+	# use P[last] for all ages greater than length P
+	i[i > length(P)] <- length(P)
+	
+	rbinom(length(i), 1, P[i]) == 0
 }
 
 # Generate a random pedigree of given depth and population size
@@ -52,7 +57,7 @@ genped <- function(founders=c(20, 20),
 				   birth_rate = .3,
 				   seasons=100,
 				   inbreeding_tol=0.1,
-				   survival=c(.4, .04)) {
+				   mortality=c(.4, .04)) {
 					
 
 	# create the initial population
@@ -118,9 +123,9 @@ genped <- function(founders=c(20, 20),
 		# mortality #
 		#############
 		
+		survives <- survival.fun(t - current$birth, mortality)
     
-    
-		
+    	ped[ped$id %in% current$id[!survives],]$death <- t
 		
 	}	
 	
