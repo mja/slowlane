@@ -57,8 +57,8 @@ survival.fun <- function(ages, P) {
 # Generate a random pedigree of given depth and population size
 pedgen <- function(founders=c(20, 20),
 				   capacity=70,
-				   im_rate=c(0, 0.3),
-				   em_rate=c(0, 0.3),
+				   im_rate=c(0.05, 0.1),
+				   em_rate=c(0, 0.5),
            primiparity=c(5,5),
 				   birth_rate = .3,
 				   seasons=100,
@@ -103,8 +103,9 @@ pedgen <- function(founders=c(20, 20),
 		#############
 		
 		# number of new migrants
-		immigrant.f <- rbinom(1, capacity, im_rate[1])
-		immigrant.m <- rbinom(1, capacity, im_rate[2])
+    # depends on sex ratio
+		immigrant.f <- rbinom(1, sum(current$sex == 1), im_rate[1])
+		immigrant.m <- rbinom(1, sum(current$sex == 0), im_rate[2])
 		
 		last_id = max(ped$id)
 		no_immigrants = c(immigrant.f, immigrant.m)
@@ -121,8 +122,8 @@ pedgen <- function(founders=c(20, 20),
 
     # choose emigrants
     # from among breeding individuals
-    emigrant.f <- sample(breeding$f, length(breeding$f)*em_rate[1], replace=FALSE)
-    emigrant.m <- sample(breeding$m, length(breeding$f)*em_rate[2], replace=FALSE)
+    emigrant.f <- breeding$f[rbinom(length(breeding$f), 1, em_rate[1]) == 1]
+    emigrant.m <- breeding$m[rbinom(length(breeding$m), 1, em_rate[2]) == 1]
     
     emigrants <- c(emigrant.f, emigrant.m)
     if(length(emigrants) >= 1) {
