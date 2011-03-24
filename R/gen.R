@@ -114,8 +114,8 @@ pedgen <- function(founders=c(20, 20),
 		
 		# number of new migrants
     # depends on sex ratio
-		immigrant.f <- rbinom(1, capacity/2, im_rate[1])
-		immigrant.m <- rbinom(1, capacity/2, im_rate[2])
+		immigrant.f <- rbinom(1, round(capacity/2), im_rate[1])
+		immigrant.m <- rbinom(1, round(capacity/2), im_rate[2])
 		
 		last_id = max(ped$id)
 		no_immigrants = c(immigrant.f, immigrant.m)
