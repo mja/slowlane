@@ -57,13 +57,13 @@ survival.fun <- function(ages, P) {
 # Generate a random pedigree of given depth and population size
 pedgen <- function(founders=c(20, 20),
 				   capacity=70,
-				   im_rate=c(0.05, 0.1),
-				   em_rate=c(0, 0.5),
+				   im_rate=c(0.0, 0.1),
+				   em_rate=c(0, 0.25),
            primiparity=c(5,5),
 				   birth_rate = .3,
 				   seasons=100,
 				   inbreeding_tol=0.1,
-				   mortality=c(.4, .04)) {
+				   mortality=c(.3, .04)) {
 					
 
 	# create the initial population
@@ -101,11 +101,21 @@ pedgen <- function(founders=c(20, 20),
 		#############
 		# migration #
 		#############
+
+    # choose emigrants
+    # from among breeding individuals
+    emigrant.f <- breeding$f[rbinom(length(breeding$f), 1, em_rate[1]) == 1]
+    emigrant.m <- breeding$m[rbinom(length(breeding$m), 1, em_rate[2]) == 1]
+    
+    emigrants <- c(emigrant.f, emigrant.m)
+    if(length(emigrants) >= 1) {
+      ped[ped$id %in% emigrants,]$emigrated <- t
+    }
 		
 		# number of new migrants
     # depends on sex ratio
-		immigrant.f <- rbinom(1, sum(current$sex == 1), im_rate[1])
-		immigrant.m <- rbinom(1, sum(current$sex == 0), im_rate[2])
+		immigrant.f <- rbinom(1, capacity/2, im_rate[1])
+		immigrant.m <- rbinom(1, capacity/2, im_rate[2])
 		
 		last_id = max(ped$id)
 		no_immigrants = c(immigrant.f, immigrant.m)
@@ -120,15 +130,6 @@ pedgen <- function(founders=c(20, 20),
 			ped <- rbind(ped, immigrants)
 		}
 
-    # choose emigrants
-    # from among breeding individuals
-    emigrant.f <- breeding$f[rbinom(length(breeding$f), 1, em_rate[1]) == 1]
-    emigrant.m <- breeding$m[rbinom(length(breeding$m), 1, em_rate[2]) == 1]
-    
-    emigrants <- c(emigrant.f, emigrant.m)
-    if(length(emigrants) >= 1) {
-      ped[ped$id %in% emigrants,]$emigrated <- t
-    }
 
 		#############
 		# mortality #
