@@ -1,0 +1,1 @@
+slowlane is a set of functions for simulating pedigrees of long-lived mammalian species, such as primates. It simulates birth, mating, and death events given restrictions on population carrying capacity. It is useful for power and sensitivity analyses of pedigree-based quantitative genetic models.
