@@ -1,13 +1,18 @@
 Package: slowlane
 Title: Simulate pedigrees for organisms with slow life-histories.
 Description: slowlane is a set of methods for generating and simulating
-  pedigrees with a focus on slow-developing, iteroparous organisms (mostly
-  Primates but also Proboscidea and Cetacea). The output is meant to
-  be used as input to animal model estimation programs for the purpose
-  of power analysis.
+    pedigrees with a focus on slow-developing, iteroparous organisms (mostly
+    Primates but also Proboscidea and Cetacea). The output is meant to
+    be used as input to animal model estimation programs for the purpose
+    of power analysis.
 Version: 0.1
 Author: Mark James Adams <mark@raysend.com>
 Maintainer: Mark James Adams <mark@raysend.com>
-Depends: plyr, MCMCglmm
-Suggests: pedantics 
+Depends:
+    plyr,
+    MCMCglmm
+Suggests:
+    pedantics
 License: MIT
+Collate:
+    'gen.R'

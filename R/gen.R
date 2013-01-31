@@ -25,7 +25,7 @@ will.breed <- function(breeding.f, birth_rate) {
 }
 
 # pick a mate for a give female
-pick.suitor <- function(female, males, A, inbreeding_tol) { # A is the relationship matrix
+pick.mate <- function(female, males, A, inbreeding_tol) { # A is the relationship matrix
 	pair <- NULL
 	relatedness <- A[as.character(female),as.character(males)]
 	relatedness[relatedness > inbreeding_tol] <- 1 # if relatedness is greater than inbreeding tolerance
@@ -54,7 +54,47 @@ survival.fun <- function(ages, P) {
 	rbinom(length(i), 1, P[i]) == 0
 }
 
-# Generate a random pedigree of given depth and population size
+#' Generate a random pedigree of given depth and troop size
+#' 
+#' Given demographic parameters, this function will simulate
+#' birth, mating, death, and migration events within a troop
+#' over a specified number of seasons, then return the pedigree 
+#' of the troop.
+#' 
+#' The returned pedigree contains columns for individual, dam, and
+#' sire IDs as well as information on sex (\code{0 = female, 1 = 
+#' male}), and season in which the individual was born, died, and
+#' emigrated. If \code{death = NA} and \code{emigrated = NA}, then
+#' the individual is still in the troop at the end of the
+#' simulation.
+#'
+#' @param founders number of female, male founders as a vector.
+#'   Founders all start at age of sexual maturity.
+#' @param capacity carrying capacity of the troop. When the troop
+#'   troop size is > 1.5 * capacity group fission occurs and a 
+#'   random half of the population emigrates.
+#' @param im_rate vector of immigration rate for females, males.
+#'   Default simulates a matrilocal society.
+#' @param em_rate vector of emigration rates for females, males.
+#'   Default simulates a matrilocal society
+#' @param primiparity age of sexual maturation for females, males.
+#' @param birth_rate probability of a female reproducing each season
+#' @param seasons number of seasons (years) to simulate
+#' @param inbreeding_tol inbreeding tolerance. Individuals will not
+#'   mate with another individuals whose 2 * coefficient of 
+#'   coancestry is >= this value.
+#' @param morality vector of age based mortalities, where 
+#'    \code{mortality[i]} is the mortality rate at age i - 1.
+#'    If the vector is shorter than the age of a given individual,
+#'    the last value in the vector is recycled. The default 
+#'    assumes infant (age = 0) mortality rate of .3 and of .04
+#'    for every age after that. 
+#' @examples
+#' library(pedantics)
+#' troop <- pedgen(c(50, 50), 140, seasons=20)
+#' pedigree <- troop[,1:3]
+#' phen <- phensim(pedigree, randomA=1, randomE=1)
+#' 
 pedgen <- function(founders=c(20, 20),
 				   capacity=70,
 				   im_rate=c(0.0, 0.1),
@@ -88,7 +128,7 @@ pedgen <- function(founders=c(20, 20),
 		breeding.f <- will.breed(breeding$f, birth_rate)
 		
 		# pick a male for each female
-		pairs <- adply(breeding.f, .margins=1, .fun=pick.suitor, males=breeding$m, A=A, inbreeding_tol=inbreeding_tol)
+		pairs <- adply(breeding.f, .margins=1, .fun=pick.mate, males=breeding$m, A=A, inbreeding_tol=inbreeding_tol)
 		
 		if(dim(pairs)[1] != 0) { # there are some breeding pairs.
 			
@@ -140,9 +180,9 @@ pedgen <- function(founders=c(20, 20),
 		try(ped[ped$id %in% current$id[!survives],]$death <- t, silent=TRUE)
 		# because the expression fails if !survives are all FALSE
 		
-		##########
-		# fusion #
-		##########
+		###########
+		# fission #
+		###########
 		
 		# if the population is 50% over carrying capacity
 		pop.size <- dim(current)[1]
