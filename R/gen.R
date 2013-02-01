@@ -89,6 +89,7 @@ survival.fun <- function(ages, P) {
 #'    the last value in the vector is recycled. The default 
 #'    assumes infant (age = 0) mortality rate of .3 and of .04
 #'    for every age after that. 
+#' @export
 #' @examples
 #' library(pedantics)
 #' troop <- pedgen(c(50, 50), 140, seasons=20)
