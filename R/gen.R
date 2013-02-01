@@ -104,7 +104,7 @@ pedgen <- function(founders=c(20, 20),
 				   birth_rate = .3,
 				   seasons=100,
 				   inbreeding_tol=0.1,
-				   mortality=c(.3, .04)) {
+				   mortality=c(.3, .15)) {
 					
 
 	# create the initial population
