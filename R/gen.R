@@ -1,5 +1,5 @@
 library(plyr)
-library(MCMCglmm)
+library(nadiv)
 
 # get the resident members from the pedigree
 resident <- function(ped) {
@@ -113,10 +113,10 @@ pedgen <- function(founders=c(20, 20),
 	# simulate for n seasons
 	for(t in 1:seasons) {
 		
-   	 	current <- resident(ped)
-		n <- dim(current)[1]
+   	current <- resident(ped)
+    n <- dim(current)[1]
 		A <- diag(1, nrow=n, ncol=n)
-		try(A <- solve(inverseA(current[,1:3])$Ainv), silent=TRUE) # fails if parents are all NA
+		try(A <- makeA(current[,1:3]), silent=TRUE) # fails if parents are all NA
 		rownames(A) <- colnames(A) <- current$id
 		
 		############
@@ -149,7 +149,8 @@ pedgen <- function(founders=c(20, 20),
     emigrant.m <- breeding$m[rbinom(length(breeding$m), 1, em_rate[2]) == 1]
     
     emigrants <- c(emigrant.f, emigrant.m)
-    if(length(emigrants) >= 1) {
+    # individuals only leave if the troop is at capacity
+    if(length(emigrants) >= 1 & n > capacity) {
       ped[ped$id %in% emigrants,]$emigrated <- t
     }
 		
@@ -184,6 +185,9 @@ pedgen <- function(founders=c(20, 20),
 		###########
 		# fission #
 		###########
+
+    # reassess residence
+    current <- resident(ped)
 		
 		# if the population is 50% over carrying capacity
 		pop.size <- dim(current)[1]
