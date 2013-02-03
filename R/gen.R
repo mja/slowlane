@@ -101,7 +101,7 @@ pedgen <- function(founders=c(35, 35),
 				   im_rate=c(0.0, 0.05),
 				   em_rate=c(0, 0.05),
            primiparity=c(5,5),
-				   birth_rate = .3,
+				   birth_rate = .4,
 				   seasons=100,
 				   inbreeding_tol=0.1,
 				   mortality=c(rep(.05, 10), seq(.05, 1, by=.1))) {
@@ -202,8 +202,8 @@ pedgen <- function(founders=c(35, 35),
 		# if the population is 50% over carrying capacity
 		pop.size <- dim(current)[1]
 		
-		if(pop.size > 1.5 * capacity) {
-			emigrants <- sample(current$id, pop.size-capacity, replace=FALSE)
+		if(pop.size > 1.1 * capacity) {
+			emigrants <- sample(current$id, pop.size-.9*capacity, replace=FALSE)
 			
 			ped[ped$id %in% emigrants,]$emigrated <- t
 			ped[ped$id %in% emigrants,]$exit <- t
@@ -228,6 +228,3 @@ season_ply <- function(pop, .fun) {
         return(calc)
 }
 
-season_ply(pop, function(x) dim(x)[1])
-season_ply(pop, function(x) mean(is.na(x$dam)))
-season_ply(pop, function(x) mean(x$sex))
