@@ -148,8 +148,12 @@ pedgen <- function(founders=c(35, 35),
 
     # choose emigrants
     # from among breeding individuals
-    emigrant.f <- breeding$f[rbinom(length(breeding$f), 1, em_rate[1] * 1/sex_ratio) == 1]
-    emigrant.m <- breeding$m[rbinom(length(breeding$m), 1, em_rate[2] * sex_ratio) == 1]
+    # adjust for sex ratio (restrict to [0, 1]
+    procrust <- function(x, a, b) { if(x < a) return(a); if(x > b) return(b); return(x)}
+    em_rate.f <- procrust(em_rate[1] * 1/sex_ratio, 0, 1)
+    em_rate.m <- procrust(em_rate[2] * sex_ratio, 0, 1)
+    emigrant.f <- breeding$f[rbinom(length(breeding$f), 1, em_rate.f) == 1]
+    emigrant.m <- breeding$m[rbinom(length(breeding$m), 1, em_rate.m) == 1]
     
     emigrants <- c(emigrant.f, emigrant.m)
     # individuals only leave if the troop is at capacity
@@ -160,8 +164,10 @@ pedgen <- function(founders=c(35, 35),
 		
 		# number of new migrants
     # depends on sex ratio
-		immigrant.f <- rbinom(1, round(capacity/2), im_rate[1] * sex_ratio)
-		immigrant.m <- rbinom(1, round(capacity/2), im_rate[2] * 1/sex_ratio)
+    im_rate.f <- procrust(im_rate[1] * sex_ratio, 0, 1)
+    im_rate.m <- procrust(im_rate[2] * 1/sex_ratio, 0, 1)
+		immigrant.f <- rbinom(1, round(capacity/2), im_rate.f)
+		immigrant.m <- rbinom(1, round(capacity/2), im_rate.m)
 		
 		last_id = max(ped$id)
 		no_immigrants = c(immigrant.f, immigrant.m)
