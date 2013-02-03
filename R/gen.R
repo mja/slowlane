@@ -40,7 +40,7 @@ breed <- function(pairs, t, last.id) {
 	n <- dim(pairs)[1]
 	return(data.frame(id=(last.id+1):(last.id+n),
 			   dam=pairs$female, sire=pairs$male,
-			   birth=t, death=NA, emigrated=NA,
+			   birth=t, death=NA, emigrated=NA, enter=t, exit=NA,
 			   sex=rbinom(n, 1, 0.5)))
 }
 
@@ -96,19 +96,19 @@ survival.fun <- function(ages, P) {
 #' pedigree <- troop[,1:3]
 #' phen <- phensim(pedigree, randomA=1, randomE=1)
 #' 
-pedgen <- function(founders=c(20, 20),
+pedgen <- function(founders=c(35, 35),
 				   capacity=70,
-				   im_rate=c(0.0, 0.1),
-				   em_rate=c(0, 0.25),
+				   im_rate=c(0.0, 0.05),
+				   em_rate=c(0, 0.05),
            primiparity=c(5,5),
 				   birth_rate = .3,
 				   seasons=100,
 				   inbreeding_tol=0.1,
-				   mortality=c(.3, .15)) {
+				   mortality=c(rep(.05, 10), seq(.05, 1, by=.1))) {
 					
 
 	# create the initial population
-	ped <- data.frame(id=1:sum(founders), dam=NA, sire=NA, sex=rep(c(0, 1), times=founders), birth=rep(-primiparity, times=founders), death=NA, emigrated=NA)
+	ped <- data.frame(id=1:sum(founders), dam=NA, sire=NA, sex=rep(c(0, 1), times=founders), birth=rep(-primiparity, times=founders), death=NA, emigrated=NA, enter=0, exit=NA)
 
 	# simulate for n seasons
 	for(t in 1:seasons) {
@@ -124,6 +124,9 @@ pedgen <- function(founders=c(20, 20),
 		############
 	
 		breeding <- living.and.breeding(current, primiparity, t)
+
+    # ratio of males to females
+    sex_ratio <- length(breeding$m) / length(breeding$f)
 		
 		# select subset of females who will breed
 		breeding.f <- will.breed(breeding$f, birth_rate)
@@ -145,19 +148,20 @@ pedgen <- function(founders=c(20, 20),
 
     # choose emigrants
     # from among breeding individuals
-    emigrant.f <- breeding$f[rbinom(length(breeding$f), 1, em_rate[1]) == 1]
-    emigrant.m <- breeding$m[rbinom(length(breeding$m), 1, em_rate[2]) == 1]
+    emigrant.f <- breeding$f[rbinom(length(breeding$f), 1, em_rate[1] * 1/sex_ratio) == 1]
+    emigrant.m <- breeding$m[rbinom(length(breeding$m), 1, em_rate[2] * sex_ratio) == 1]
     
     emigrants <- c(emigrant.f, emigrant.m)
     # individuals only leave if the troop is at capacity
     if(length(emigrants) >= 1 & n > capacity) {
       ped[ped$id %in% emigrants,]$emigrated <- t
+      ped[ped$id %in% emigrants,]$exit <- t
     }
 		
 		# number of new migrants
     # depends on sex ratio
-		immigrant.f <- rbinom(1, round(capacity/2), im_rate[1])
-		immigrant.m <- rbinom(1, round(capacity/2), im_rate[2])
+		immigrant.f <- rbinom(1, round(capacity/2), im_rate[1] * sex_ratio)
+		immigrant.m <- rbinom(1, round(capacity/2), im_rate[2] * 1/sex_ratio)
 		
 		last_id = max(ped$id)
 		no_immigrants = c(immigrant.f, immigrant.m)
@@ -167,7 +171,7 @@ pedgen <- function(founders=c(20, 20),
 									 sex=rep(c(0, 1), times=no_immigrants),
 									 birth=rep(t - primiparity, times=no_immigrants), # for now assume new migrants
 									 death=NA,				# are exactly at breeding age
-                   emigrated=NA)
+                   emigrated=NA, enter=t, exit=NA)
 								
 			ped <- rbind(ped, immigrants)
 		}
@@ -179,7 +183,7 @@ pedgen <- function(founders=c(20, 20),
 		
 		survives <- survival.fun(t - current$birth, mortality)
     
-		try(ped[ped$id %in% current$id[!survives],]$death <- t, silent=TRUE)
+		try(ped[ped$id %in% current$id[!survives],]$death <- ped[ped$id %in% current$id[!survives],]$exit <- t, silent=TRUE)
 		# because the expression fails if !survives are all FALSE
 		
 		###########
@@ -193,12 +197,31 @@ pedgen <- function(founders=c(20, 20),
 		pop.size <- dim(current)[1]
 		
 		if(pop.size > 1.5 * capacity) {
-			emigrants <- sample(current$id, pop.size/2, replace=FALSE)
+			emigrants <- sample(current$id, pop.size-capacity, replace=FALSE)
 			
 			ped[ped$id %in% emigrants,]$emigrated <- t
+			ped[ped$id %in% emigrants,]$exit <- t
 		}
 	}	
 	
 	return(ped)
 					
 }
+
+resident_in_season <- function(pop, season) subset(pop, enter <= season & (season <= exit | is.na(exit)))
+
+
+season_ply <- function(pop, .fun) {
+
+        seasons <- sort(unique(c(pop$enter, pop$exit)))
+
+        calc <- sapply(seq_along(seasons), function(s) .fun(resident_in_season(pop, s)))
+
+        names(calc) <- seasons
+
+        return(calc)
+}
+
+season_ply(pop, function(x) dim(x)[1])
+season_ply(pop, function(x) mean(is.na(x$dam)))
+season_ply(pop, function(x) mean(x$sex))
