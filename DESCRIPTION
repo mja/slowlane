@@ -10,8 +10,9 @@ Author: Mark James Adams <mark@raysend.com>
 Maintainer: Mark James Adams <mark@raysend.com>
 Depends:
     plyr,
-    MCMCglmm
+    nadiv
 Suggests:
-    pedantics
+    pedantics,
+    MCMCglmm
 Collate:
     'gen.R'
