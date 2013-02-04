@@ -13,6 +13,5 @@ Depends:
     MCMCglmm
 Suggests:
     pedantics
-License: MIT
 Collate:
     'gen.R'
