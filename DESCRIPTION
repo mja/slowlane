@@ -14,5 +14,6 @@ Depends:
 Suggests:
     pedantics,
     MCMCglmm
+License: CC0
 Collate:
     'gen.R'
